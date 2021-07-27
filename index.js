@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const categoryRouter = require("./routers/categoryRoutes")
+const categoryRouter = require("./routers/categoryRoutes");
+const subcategoryRouter = require("./routers/subcategoryRoutes");
 
 const PORT = 5000;
 
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
   //res.send("Server is up and running on port %s", PORT);
 });
 
-app.use("/api", categoryRouter)
+app.use("/api", categoryRouter);
+app.use("/api", subcategoryRouter);
 
 app.listen(PORT);

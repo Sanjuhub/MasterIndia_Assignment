@@ -1,4 +1,3 @@
-const categoryModel = require("../models/categoryModel");
 const CategoryModel = require("../models/categoryModel");
 
 async function createCatergory(req, res) {
@@ -23,7 +22,7 @@ async function createCatergory(req, res) {
 }
 
 async function getCategory(req, res) {
-  categoryModel.find().exec((err, data) => {
+  CategoryModel.find().exec((err, data) => {
     if (err) {
       return res.json(err);
     } else {
@@ -35,7 +34,7 @@ async function getCategory(req, res) {
 function deleteCategory(req, res) {
   const title = req.body.title;
 
-  categoryModel.findOneAndDelete({ title }).then((data) => {
+  CategoryModel.findOneAndDelete({ title }).then((data) => {
     if (!data) {
       return res.status(404).json("Given category does not exist.");
     } else {
@@ -44,8 +43,37 @@ function deleteCategory(req, res) {
   });
 }
 
+async function getSubcategory(req, res) {
+  const title = req.body.title;
+
+  const findCategory = await CategoryModel.findOne({ title });
+  if (!findCategory) {
+    return res.json("Unble to find given category.");
+  }
+
+  CategoryModel.aggregate([
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "_id",
+        foreignField: "categoryId",
+        as: "subcategory",
+      },
+    },
+    { $match: { title } },
+    { $project: { _id: 0 } },
+  ]).then((err, data) => {
+    if (err) {
+      return res.json(err);
+    } else {
+      res.json(data);
+    }
+  });
+}
+
 module.exports = {
   getCategory,
   createCatergory,
   deleteCategory,
+  getSubcategory,
 };
