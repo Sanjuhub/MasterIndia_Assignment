@@ -48,10 +48,11 @@ async function getSubcategory(req, res) {
 
   const findCategory = await CategoryModel.findOne({ title });
   if (!findCategory) {
-    return res.json("Unble to find given category.");
+    return res.status(404).json("Unble to find given category.");
   }
 
   CategoryModel.aggregate([
+    { $match: { title } },
     {
       $lookup: {
         from: "subcategories",
@@ -60,8 +61,7 @@ async function getSubcategory(req, res) {
         as: "subcategory",
       },
     },
-    { $match: { title } },
-    { $project: { _id: 0 } },
+    { $project: { _id: 0, title: 1, "subcategory.title": 1 } },
   ]).then((err, data) => {
     if (err) {
       return res.json(err);
